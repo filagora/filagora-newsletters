@@ -1,12 +1,12 @@
-# ForumKit Newsletters
+# Filagora Newsletters
 
-Newsletters, subscribers, sends and events for ForumKit, independent of any one mail provider.
+Newsletters, subscribers, sends and events for Filagora, independent of any one mail provider.
 
 > **Planned, not yet built.** There is no code, no release and no Packagist package yet. It is
-> part of [ForumKit](https://github.com/zcwilt/forumkit-core), a family of Laravel 13 / Filament 5
+> part of [Filagora](https://github.com/filagora/filagora-core), a family of Laravel 13 / Filament 5
 > packages; the first ones available are
-> [`zcwilt/forumkit-core`](https://github.com/zcwilt/forumkit-core) and
-> [`zcwilt/forumkit-entitlements`](https://github.com/zcwilt/forumkit-entitlements).
+> [`filagora/filagora-core`](https://github.com/filagora/filagora-core) and
+> [`filagora/filagora-entitlements`](https://github.com/filagora/filagora-entitlements).
 
 ## Licence
 
