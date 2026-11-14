@@ -166,6 +166,21 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Campaign preview
+    |--------------------------------------------------------------------------
+    |
+    | The page the campaign screens show in a frame and open in a new tab: the campaign as the email
+    | will look (route newsletters.preview). It asks for the newsletter ability.
+    |
+    */
+    'preview' => [
+        'enabled' => true,
+        'prefix' => 'staff/newsletters',
+        'middleware' => ['web', 'auth'],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Rich-text editor
     |--------------------------------------------------------------------------
     |

@@ -48,4 +48,15 @@ return [
     'blocks' => [
         'navigation_label' => 'Blocks',
     ],
+
+    'newsletters' => [
+        'navigation_label' => 'Newsletters',
+    ],
+
+    'settings' => [
+        'navigation_label' => 'Settings',
+        'title' => 'Newsletter Settings',
+        'save' => 'Save settings',
+        'asset_unavailable' => 'Selected asset preview is unavailable.',
+    ],
 ];
