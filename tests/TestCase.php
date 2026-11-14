@@ -6,8 +6,11 @@ namespace Filagora\Newsletters\Tests;
 
 use BladeUI\Heroicons\BladeHeroiconsServiceProvider;
 use BladeUI\Icons\BladeIconsServiceProvider;
+use Filagora\Core\Contracts\AccessChecker;
 use Filagora\Core\CoreServiceProvider;
 use Filagora\Newsletters\NewslettersServiceProvider;
+use Filagora\Newsletters\Tests\Support\GrantedKeys;
+use Filagora\Newsletters\Tests\Support\TestPanelProvider;
 use Filagora\Newsletters\Tests\Support\TestSupportServiceProvider;
 use Filagora\Newsletters\Tests\Support\TestUser;
 use Filament\Actions\ActionsServiceProvider;
@@ -42,7 +45,16 @@ abstract class TestCase extends Orchestra
             CoreServiceProvider::class,
             NewslettersServiceProvider::class,
             TestSupportServiceProvider::class,
+            TestPanelProvider::class,
         ];
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->app->singleton(GrantedKeys::class);
+        $this->app->bind(AccessChecker::class, GrantedKeys::class);
     }
 
     protected function defineEnvironment($app): void

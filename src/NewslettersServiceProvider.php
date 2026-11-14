@@ -6,8 +6,13 @@ namespace Filagora\Newsletters;
 
 use Filagora\Core\Modules\Module;
 use Filagora\Core\Modules\ModuleRegistry;
+use Filagora\Core\Navigation\NavigationGroupDefinition;
+use Filagora\Core\Navigation\NavigationGroupRegistry;
 use Filagora\Core\Schema\PackageSchema;
 use Filagora\Core\Schema\SchemaRegistry;
+use Filagora\Core\Support\GateAbilities;
+use Filagora\Entitlements\Registry\Definition;
+use Filagora\Entitlements\Registry\EntitlementRegistry;
 use Filagora\Newsletters\Console\ExportSubscribersCommand;
 use Filagora\Newsletters\Console\QueueScheduledCommand;
 use Filagora\Newsletters\Contracts\NewsletterMedia;
@@ -54,6 +59,16 @@ class NewslettersServiceProvider extends ServiceProvider
             PackageSchema::fromFile('newsletters', __DIR__.'/../database/schema.php', __DIR__.'/../database/migrations'),
         );
 
+        GateAbilities::define('filagora-newsletters.gates');
+        $this->app->make(NavigationGroupRegistry::class)->register(new NavigationGroupDefinition(
+            key: 'newsletters',
+            label: fn (): string => __('filagora-newsletters::messages.navigation_groups.newsletters'),
+            // The group has no icon of its own: Filament refuses a group icon beside item icons.
+            icon: null,
+            sort: 50,
+        ));
+        $this->declareEntitlements();
+
         RateLimiter::for('newsletter-signup', fn (Request $request): Limit => Limit::perMinute((int) config('filagora-newsletters.routes.signup_per_minute', 5))
             ->by('newsletter-signup:'.($request->ip() ?: 'unknown')));
 
@@ -81,6 +96,23 @@ class NewslettersServiceProvider extends ServiceProvider
             $this->publishes([
                 __DIR__.'/../database/migrations' => database_path('migrations'),
             ], 'filagora-newsletters-migrations');
+        }
+    }
+
+    /**
+     * With the entitlements package installed, the staff ability appears in its definitions list,
+     * so it can be granted in the entitlements screens.
+     */
+    private function declareEntitlements(): void
+    {
+        if (! class_exists(EntitlementRegistry::class) || ! $this->app->bound(EntitlementRegistry::class)) {
+            return;
+        }
+
+        $registry = $this->app->make(EntitlementRegistry::class);
+
+        foreach (GateAbilities::keys('filagora-newsletters.gates') as $entitlement) {
+            $registry->define(new Definition($entitlement, wildcardChildren: false));
         }
     }
 }

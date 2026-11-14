@@ -152,6 +152,35 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Access
+    |--------------------------------------------------------------------------
+    |
+    | The one ability behind every newsletter screen (campaigns, blocks, subscribers and
+    | settings), and the access key it asks for. Remap the key to your own; the ability keeps its
+    | name.
+    |
+    */
+    'gates' => [
+        'filagora.newsletters.manage' => 'filagora.newsletters.manage',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Rich-text editor
+    |--------------------------------------------------------------------------
+    |
+    | The editors for campaign text and text blocks always have the tracked-link button. A host
+    | adds its own: `plugins` are classes implementing Filament's RichContentPlugin, and
+    | `toolbar_buttons` the names of the buttons they provide.
+    |
+    */
+    'editor' => [
+        'plugins' => [],
+        'toolbar_buttons' => [],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Navigation group
     |--------------------------------------------------------------------------
     |
