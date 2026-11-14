@@ -88,11 +88,29 @@ return [
     | `provider` names the Laravel mailer (config/mail.php) campaign mail goes through, and decides
     | which outbound tagging (Mailgun or Mailtrap variables) is attached so delivery events can be
     | matched to a send. Null uses the application's default mailer. It must name a mailer that
-    | exists in config/mail.php.
+    | exists in config/mail.php. `campaign_daily_limit` caps how many recipient jobs are released per
+    | day (the rest wait for tomorrow); zero or less releases none. `queue` names the queue the
+    | recipient jobs use (null: the default queue).
     |
     */
     'delivery' => [
         'provider' => env('FILAGORA_NEWSLETTERS_DELIVERY_PROVIDER'),
+        'campaign_daily_limit' => (int) env('FILAGORA_NEWSLETTERS_DAILY_LIMIT', 90),
+        'queue' => env('FILAGORA_NEWSLETTERS_QUEUE'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Schedule
+    |--------------------------------------------------------------------------
+    |
+    | When on, the package adds `filagora:newsletters:queue-scheduled` to the scheduler every
+    | minute: it queues campaigns whose time has come and releases queued recipients up to the
+    | daily limit. Turn it off if your application schedules the command itself.
+    |
+    */
+    'schedule' => [
+        'enabled' => true,
     ],
 
     /*
