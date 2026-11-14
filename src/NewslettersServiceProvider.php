@@ -16,6 +16,7 @@ use Filagora\Newsletters\Services\BrandingSettings;
 use Filagora\Newsletters\Services\CampaignMailer;
 use Filagora\Newsletters\Services\CampaignSender;
 use Filagora\Newsletters\Services\ContentRenderer;
+use Filagora\Newsletters\Services\DeliveryEvents;
 use Filagora\Newsletters\Services\DeliveryTransport;
 use Filagora\Newsletters\Services\LinkTracker;
 use Filagora\Newsletters\Services\Subscribers;
@@ -38,6 +39,7 @@ class NewslettersServiceProvider extends ServiceProvider
         $this->app->singleton(ContentRenderer::class);
         $this->app->singleton(BrandingSettings::class);
         $this->app->singleton(DeliveryTransport::class);
+        $this->app->singleton(DeliveryEvents::class);
         $this->app->singleton(CampaignSender::class);
         $this->app->singleton(CampaignMailer::class);
     }

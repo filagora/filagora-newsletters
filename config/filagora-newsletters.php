@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use Filagora\Newsletters\Events\MailgunEvents;
+use Filagora\Newsletters\Events\MailtrapEvents;
 use Filagora\Newsletters\Models\Newsletter;
 use Filagora\Newsletters\Models\NewsletterBlock;
 use Filagora\Newsletters\Models\NewsletterEvent;
@@ -97,6 +99,24 @@ return [
         'provider' => env('FILAGORA_NEWSLETTERS_DELIVERY_PROVIDER'),
         'campaign_daily_limit' => (int) env('FILAGORA_NEWSLETTERS_DAILY_LIMIT', 90),
         'queue' => env('FILAGORA_NEWSLETTERS_QUEUE'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Delivery events
+    |--------------------------------------------------------------------------
+    |
+    | The class that reads each mail provider's webhook events, by provider name. The host serves
+    | the webhook (and checks its signature) and passes the decoded event to
+    | `DeliveryEvents::handle($provider, $event)`. Add a provider by naming a class that implements
+    | `Contracts\EventHandler`.
+    |
+    */
+    'events' => [
+        'handlers' => [
+            'mailgun' => MailgunEvents::class,
+            'mailtrap' => MailtrapEvents::class,
+        ],
     ],
 
     /*
