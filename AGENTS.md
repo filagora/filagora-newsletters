@@ -4,7 +4,7 @@ Guidance for AI coding agents working in `filagora-newsletters`. `CLAUDE.md` imp
 
 ## What this is
 
-Newsletters, subscribers, sends and events (independent of any one mail provider) for Filagora, a family of MIT-licensed Laravel 13 / Filament 5 packages. **Under construction, unreleased:** it is being extracted from the host code of the Zen Cart support site (`filagora-zencart-site`). The design and the slice order are in the private planning repository (`newsletters-design.md`); the first slice (tables, models, enums) is built. Composer vendor `filagora`, namespace `Filagora\Newsletters\`, default table prefix `filagora_`, env `FILAGORA_NEWSLETTERS_*`. Pre-1.0 (`0.x`): the API may change between minor versions.
+Newsletters, subscribers, sends and events (independent of any one mail provider) for Filagora, a family of MIT-licensed Laravel 13 / Filament 5 packages. Extracted from the host code of the Zen Cart support site (`filagora-zencart-site`); released as `0.1`. The design and the slice order are in the private planning repository (`newsletters-design.md`). Composer vendor `filagora`, namespace `Filagora\Newsletters\`, default table prefix `filagora_`, env `FILAGORA_NEWSLETTERS_*`. Pre-1.0 (`0.x`): the API may change between minor versions.
 
 ## Working here
 
