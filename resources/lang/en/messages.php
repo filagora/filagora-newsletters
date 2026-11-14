@@ -30,4 +30,10 @@ return [
         'unsubscribed_text' => 'This email address will no longer receive the :name.',
         'signup_again' => 'Newsletter Signup',
     ],
+
+    'mail' => [
+        'preview_subject' => '[Preview] ',
+        'preview_notice' => 'Preview test send. This message has not been sent to newsletter subscribers.',
+        'preview_text' => '[Preview test send]',
+    ],
 ];
