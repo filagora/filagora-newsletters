@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Filagora\Newsletters;
 
+use Filagora\Newsletters\Filament\Resources\NewsletterBlocks\NewsletterBlockResource;
+use Filagora\Newsletters\Filament\Resources\NewsletterSubscribers\NewsletterSubscriberResource;
 use Filament\Contracts\Plugin;
 use Filament\Panel;
 
@@ -21,11 +23,11 @@ class NewslettersPlugin implements Plugin
 
     public function register(Panel $panel): void
     {
-        // Register resources, pages and widgets here.
+        $panel->resources([
+            NewsletterBlockResource::class,
+            NewsletterSubscriberResource::class,
+        ]);
     }
 
-    public function boot(Panel $panel): void
-    {
-        //
-    }
+    public function boot(Panel $panel): void {}
 }

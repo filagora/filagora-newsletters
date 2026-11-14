@@ -9,8 +9,9 @@ Requires [`filagora/filagora-core`](https://github.com/filagora/filagora-core).
 > so that site can adopt them as they are), subscribers (signup, confirmation, unsubscribe and
 > consent), campaign rendering (content blocks, branding, tracked links and the campaign mail) and
 > sending (queueing a campaign, per-recipient jobs, the scheduler and a daily limit) and delivery
-> events (bounces, complaints, unsubscribes, opens and clicks from Mailgun and Mailtrap). The
-> Filament screens arrive in a later slice.
+> events (bounces, complaints, unsubscribes, opens and clicks from Mailgun and Mailtrap), plus the
+> first Filament screens (subscribers and reusable blocks). The campaign screens, the settings
+> page and the preview arrive in the next slice.
 > It will be at `0.x`: the API may change between minor versions.
 
 ## What it provides
@@ -36,7 +37,11 @@ This package fires no events yet.
 
 ### Access
 
-This package defines no abilities yet.
+| Ability | Entitlement key |
+| --- | --- |
+| `filagora.newsletters.manage` | `filagora.newsletters.manage` |
+
+One ability opens every newsletter screen. Remap the key under `gates` in the config (the Zen Cart profile maps it to `operator.newsletter.manage`). With `filagora-entitlements` installed the key is declared so `filagora:entitlements:sync` creates its definition. Nothing is allowed unless the ability passes.
 
 ### Using it
 
@@ -44,6 +49,10 @@ This package defines no abilities yet.
 - **Rendering.** `ContentRenderer` turns a newsletter's content blocks (header, text, image, button, footer, or a reference to a reusable library block) into email HTML and text. `preparedBlocks()` shapes blocks for storage: the shared header goes first, the shared footer last, and library references stay live so an edit to a reusable block reaches campaigns not yet sent. `BrandingSettings` holds the shared brand name, header line, logo, footer text and unsubscribe-link label (saved as settings; `branding` in the config gives the defaults). `CampaignMail` is the mailable; its views are `filagora-newsletters::mail.*` and can be overridden.
 - **Tracked links.** Button blocks, and links in rich text that carry the `nl-tracked-link` marker classes, are rewritten to a signed first-party redirect (`newsletter.link-click`, part of the public routes). A click is recorded against the send and the library block, then redirects to the link's *current* destination, so a corrected link works for mail already sent. Only `http` and `https` destinations are followed.
 - **Images.** The package has no media library: bind `Contracts\NewsletterMedia` to yours (it answers an image's URL and alt text by number, and lists the choices for the editor). The default finds no images.
+- **Filament screens.** `NewslettersPlugin::make()` on a panel adds a *Newsletters* navigation group with:
+  - **Subscribers:** list with filters, add and edit (the address is normalised on the server), unsubscribe or re-confirm one (the reason is kept as the consent record), and bulk unsubscribe or CSV export. A subscriber is never deleted here.
+  - **Blocks:** the reusable library (text, image, button), with the shared header and footer as system blocks that cannot be deleted and whose content comes from the newsletter settings; a block's page shows its click performance across every campaign that uses it.
+  - **Rich-text editor:** every editor has the *Insert Tracked Link* button. Add your own plugins (for example a media library's image button) under `editor.plugins` and `editor.toolbar_buttons`.
 - **Sending.** `CampaignSender::queue($newsletter)` turns a draft or scheduled newsletter into one `queued` send per sendable subscriber (confirmed, not unsubscribed, no suppression hash), marks the newsletter `sending`, and releases recipient jobs. It refuses a newsletter that is not a draft or scheduled, or that already has deliveries. `CampaignSender::dispatchQueuedSends()` releases waiting recipients up to the daily limit (`delivery.campaign_daily_limit`, 90 by default; the rest wait for the next day, which the every-minute command picks up). Each recipient is a `SendCampaignEmail` job (three tries, with a back-off; `delivery.queue` names the queue) that calls `CampaignMailer`: it skips someone who unsubscribed since being queued, sends with their own signed unsubscribe link, marks the send `sent` or `failed` with the reason, and marks the newsletter `sent` when nothing is left waiting. `CampaignMailer::sendPreview()` sends a preview to any address.
 - **Delivery events.** The host serves the provider's webhook (and checks its signature and guards against replays) and passes each decoded event to `DeliveryEvents::handle('mailgun', $event)`. The provider's handler (`MailgunEvents`, `MailtrapEvents`) finds the send (by the send id the mail was tagged with, else the provider's message id, else the recipient's latest send), keeps the event, and updates the send: a delivery marks it `sent`, a failure marks it `failed` with the provider's message. A **permanent bounce**, a **complaint** or the provider's **unsubscribe** also changes the subscriber (`bounced`, `complained`, `unsubscribed`), with the provider named in the reason (`mailgun_bounce`). Opens and clicks are kept as events only. It answers a short note when the event was about a newsletter and **null when it was not**, so the host can go on to treat it as ordinary mail. Another provider is a class that implements `Contracts\EventHandler`, named under `events.handlers`.
 - **Delivery.** `DeliveryTransport` sends through the mailer named by `delivery.provider` (the application's default when null); `CampaignMail` tags outgoing mail with the send id for Mailgun or Mailtrap so their events can be matched to a send.

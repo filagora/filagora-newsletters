@@ -36,4 +36,16 @@ return [
         'preview_notice' => 'Preview test send. This message has not been sent to newsletter subscribers.',
         'preview_text' => '[Preview test send]',
     ],
+
+    'navigation_groups' => [
+        'newsletters' => 'Newsletters',
+    ],
+
+    'subscribers' => [
+        'navigation_label' => 'Subscribers',
+    ],
+
+    'blocks' => [
+        'navigation_label' => 'Blocks',
+    ],
 ];
