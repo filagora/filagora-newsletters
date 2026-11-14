@@ -8,6 +8,12 @@ use Filagora\Core\Modules\Module;
 use Filagora\Core\Modules\ModuleRegistry;
 use Filagora\Core\Schema\PackageSchema;
 use Filagora\Core\Schema\SchemaRegistry;
+use Filagora\Newsletters\Contracts\NewsletterMedia;
+use Filagora\Newsletters\Media\NoMedia;
+use Filagora\Newsletters\Services\BrandingSettings;
+use Filagora\Newsletters\Services\ContentRenderer;
+use Filagora\Newsletters\Services\DeliveryTransport;
+use Filagora\Newsletters\Services\LinkTracker;
 use Filagora\Newsletters\Services\Subscribers;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -21,7 +27,12 @@ class NewslettersServiceProvider extends ServiceProvider
     {
         $this->mergeConfigFrom(__DIR__.'/../config/filagora-newsletters.php', 'filagora-newsletters');
 
+        $this->app->bindIf(NewsletterMedia::class, NoMedia::class);
         $this->app->singleton(Subscribers::class);
+        $this->app->singleton(LinkTracker::class);
+        $this->app->singleton(ContentRenderer::class);
+        $this->app->singleton(BrandingSettings::class);
+        $this->app->singleton(DeliveryTransport::class);
     }
 
     public function boot(): void

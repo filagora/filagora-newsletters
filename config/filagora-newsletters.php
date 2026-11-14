@@ -82,6 +82,38 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Delivery
+    |--------------------------------------------------------------------------
+    |
+    | `provider` names the Laravel mailer (config/mail.php) campaign mail goes through, and decides
+    | which outbound tagging (Mailgun or Mailtrap variables) is attached so delivery events can be
+    | matched to a send. Null uses the application's default mailer. It must name a mailer that
+    | exists in config/mail.php.
+    |
+    */
+    'delivery' => [
+        'provider' => env('FILAGORA_NEWSLETTERS_DELIVERY_PROVIDER'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Branding defaults
+    |--------------------------------------------------------------------------
+    |
+    | What the shared header and footer say until an editor saves their own in the newsletter
+    | settings (those are stored as settings and win over these).
+    |
+    */
+    'branding' => [
+        'brand_name' => 'Newsletter',
+        'header_eyebrow' => 'Newsletter',
+        'logo_alt' => '',
+        'footer_text' => 'You are receiving this because you subscribed to the newsletter.',
+        'manage_link_label' => 'Unsubscribe or manage newsletter signup',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Navigation group
     |--------------------------------------------------------------------------
     |
