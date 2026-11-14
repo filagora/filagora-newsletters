@@ -10,7 +10,25 @@ use Filagora\Newsletters\Support\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property int $id
+ * @property int $newsletter_id
+ * @property int|null $newsletter_subscriber_id
+ * @property string $email
+ * @property string $normalized_email
+ * @property string|null $name
+ * @property NewsletterSendStatus $status
+ * @property Carbon|null $queued_at
+ * @property Carbon|null $dispatched_at
+ * @property Carbon|null $sent_at
+ * @property Carbon|null $failed_at
+ * @property Carbon|null $skipped_at
+ * @property string|null $provider_message_id
+ * @property string|null $error
+ * @property array<string, mixed>|null $metadata
+ */
 class NewsletterSend extends Model
 {
     public function getTable(): string
@@ -53,7 +71,7 @@ class NewsletterSend extends Model
     }
 
     /**
-     * @return BelongsTo<Model, $this>
+     * @return BelongsTo<Newsletter, $this>
      */
     public function newsletter(): BelongsTo
     {
@@ -61,7 +79,7 @@ class NewsletterSend extends Model
     }
 
     /**
-     * @return BelongsTo<Model, $this>
+     * @return BelongsTo<NewsletterSubscriber, $this>
      */
     public function subscriber(): BelongsTo
     {
@@ -69,7 +87,7 @@ class NewsletterSend extends Model
     }
 
     /**
-     * @return HasMany<Model, $this>
+     * @return HasMany<NewsletterEvent, $this>
      */
     public function events(): HasMany
     {
@@ -77,7 +95,7 @@ class NewsletterSend extends Model
     }
 
     /**
-     * @return HasMany<Model, $this>
+     * @return HasMany<NewsletterLinkClick, $this>
      */
     public function linkClicks(): HasMany
     {

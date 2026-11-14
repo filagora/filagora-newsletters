@@ -4,6 +4,12 @@ declare(strict_types=1);
 
 namespace Filagora\Newsletters\Support;
 
+use Filagora\Newsletters\Models\Newsletter;
+use Filagora\Newsletters\Models\NewsletterBlock;
+use Filagora\Newsletters\Models\NewsletterEvent;
+use Filagora\Newsletters\Models\NewsletterLinkClick;
+use Filagora\Newsletters\Models\NewsletterSend;
+use Filagora\Newsletters\Models\NewsletterSubscriber;
 use Illuminate\Database\Eloquent\Model;
 use InvalidArgumentException;
 
@@ -15,7 +21,7 @@ use InvalidArgumentException;
 final class Models
 {
     /**
-     * @return class-string<Model>
+     * @return ($key is 'newsletter' ? class-string<Newsletter> : ($key is 'block' ? class-string<NewsletterBlock> : ($key is 'event' ? class-string<NewsletterEvent> : ($key is 'link_click' ? class-string<NewsletterLinkClick> : ($key is 'send' ? class-string<NewsletterSend> : ($key is 'subscriber' ? class-string<NewsletterSubscriber> : class-string<Model>))))))
      */
     public static function class(string $key): string
     {

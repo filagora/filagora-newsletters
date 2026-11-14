@@ -12,7 +12,30 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property int $id
+ * @property int|null $user_id
+ * @property string $email
+ * @property string $normalized_email
+ * @property string|null $suppression_hash
+ * @property string|null $name
+ * @property NewsletterSubscriberStatus|null $status
+ * @property string $source
+ * @property string|null $mailchimp_id
+ * @property Carbon|null $subscribed_at
+ * @property Carbon|null $confirmed_at
+ * @property Carbon|null $unsubscribed_at
+ * @property Carbon|null $bounced_at
+ * @property Carbon|null $complained_at
+ * @property string|null $unsubscribe_reason
+ * @property string|null $consent_text
+ * @property string|null $consent_version
+ * @property string|null $consent_ip
+ * @property string|null $consent_user_agent
+ * @property array<string, mixed>|null $metadata
+ */
 class NewsletterSubscriber extends Model
 {
     public function getTable(): string
@@ -64,7 +87,7 @@ class NewsletterSubscriber extends Model
     }
 
     /**
-     * @return HasMany<Model, $this>
+     * @return HasMany<NewsletterSend, $this>
      */
     public function newsletterSends(): HasMany
     {

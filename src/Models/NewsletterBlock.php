@@ -10,7 +10,21 @@ use Filagora\Newsletters\Enums\NewsletterBlockType;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property int $id
+ * @property int|null $created_by
+ * @property int|null $updated_by
+ * @property string $key
+ * @property string $name
+ * @property NewsletterBlockType $type
+ * @property array<string, mixed>|null $content
+ * @property bool $is_system
+ * @property bool $is_active
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ */
 class NewsletterBlock extends Model
 {
     public function getTable(): string

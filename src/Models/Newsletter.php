@@ -11,7 +11,27 @@ use Filagora\Newsletters\Support\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property int $id
+ * @property int|null $created_by
+ * @property int|null $updated_by
+ * @property string $title
+ * @property string $subject
+ * @property string|null $preheader
+ * @property string $background_color
+ * @property string $inner_background_color
+ * @property string $body_html
+ * @property string|null $body_text
+ * @property list<array<string, mixed>>|null $content_blocks
+ * @property NewsletterStatus $status
+ * @property Carbon|null $scheduled_at
+ * @property Carbon|null $sent_at
+ * @property array<string, mixed>|null $metadata
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ */
 class Newsletter extends Model
 {
     public function getTable(): string
@@ -70,7 +90,7 @@ class Newsletter extends Model
     }
 
     /**
-     * @return HasMany<Model, $this>
+     * @return HasMany<NewsletterSend, $this>
      */
     public function sends(): HasMany
     {
@@ -78,7 +98,7 @@ class Newsletter extends Model
     }
 
     /**
-     * @return HasMany<Model, $this>
+     * @return HasMany<NewsletterLinkClick, $this>
      */
     public function linkClicks(): HasMany
     {
@@ -92,6 +112,6 @@ class Newsletter extends Model
      */
     public function isDeletable(): bool
     {
-        return ($this->status?->isEditable() ?? false) && ! $this->sends()->exists();
+        return $this->status->isEditable() && ! $this->sends()->exists();
     }
 }
