@@ -4,15 +4,9 @@ Newsletters for Filagora: subscribers with their consent record, campaigns built
 blocks, scheduled sends, link tracking and delivery events, independent of any one mail provider.
 Requires [`filagora/filagora-core`](https://github.com/filagora/filagora-core).
 
-> **In development, not yet released.** So far it has the tables, models and enums (with a schema
-> snapshot that matches the live tables of the site the package was extracted from, zen-cart.com,
-> so that site can adopt them as they are), subscribers (signup, confirmation, unsubscribe and
-> consent), campaign rendering (content blocks, branding, tracked links and the campaign mail) and
-> sending (queueing a campaign, per-recipient jobs, the scheduler and a daily limit) and delivery
-> events (bounces, complaints, unsubscribes, opens and clicks from Mailgun and Mailtrap) and the
-> Filament screens (campaigns, blocks, subscribers, settings and the preview). What remains before
-> a release is the swap of the Zen Cart site over to the package.
-> It will be at `0.x`: the API may change between minor versions.
+> The package is at `0.1`: the API may change between `0.x` minor versions. It was extracted from
+> the zen-cart.com support site, and its tables match that site's live tables, so the site can adopt
+> them as they are with `filagora:adopt`.
 
 ## What it provides
 
@@ -69,8 +63,6 @@ One ability opens every newsletter screen. Remap the key under `gates` in the co
 PHP 8.4, Laravel 13 and Filament 5. Tested against MariaDB 11.4. Requires [`filagora/filagora-core`](https://github.com/filagora/filagora-core).
 
 ## Install
-
-Not yet on Packagist. Once released:
 
 ```bash
 composer require filagora/filagora-newsletters

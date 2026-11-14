@@ -5,6 +5,8 @@ All notable changes to this package are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-11-14
+
 ### Added
 
 - The six newsletter tables (subscribers, newsletters, sends, events, content blocks, link clicks) with a schema snapshot equal to the live tables of the site the package was extracted from, so `filagora:adopt` accepts them.
