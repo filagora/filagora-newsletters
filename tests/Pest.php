@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Filagora\Newsletters\Support\Gates;
 use Filagora\Newsletters\Tests\Support\GrantedKeys;
 use Filagora\Newsletters\Tests\Support\TestUser;
+use Filagora\Newsletters\Tests\Switches\RoutesOffTestCase;
 use Filagora\Newsletters\Tests\TestCase;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -25,3 +26,5 @@ function newsletterManager(string $name = 'Manager'): TestUser
 
     return $user;
 }
+
+pest()->extend(RoutesOffTestCase::class)->use(RefreshDatabase::class)->in('Switches/RoutesOff');

@@ -82,6 +82,12 @@ class NewslettersServiceProvider extends ServiceProvider
             $this->callAfterResolving(Schedule::class, fn (Schedule $schedule) => $schedule->command('filagora:newsletters:queue-scheduled')->everyMinute()->withoutOverlapping());
         }
 
+        if (config('filagora-newsletters.preview.enabled', true)) {
+            Route::prefix((string) config('filagora-newsletters.preview.prefix', 'staff/newsletters'))
+                ->middleware((array) config('filagora-newsletters.preview.middleware', ['web', 'auth']))
+                ->group(__DIR__.'/../routes/preview.php');
+        }
+
         $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'filagora-newsletters');
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'filagora-newsletters');
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');

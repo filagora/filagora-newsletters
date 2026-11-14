@@ -9,9 +9,9 @@ Requires [`filagora/filagora-core`](https://github.com/filagora/filagora-core).
 > so that site can adopt them as they are), subscribers (signup, confirmation, unsubscribe and
 > consent), campaign rendering (content blocks, branding, tracked links and the campaign mail) and
 > sending (queueing a campaign, per-recipient jobs, the scheduler and a daily limit) and delivery
-> events (bounces, complaints, unsubscribes, opens and clicks from Mailgun and Mailtrap), plus the
-> first Filament screens (subscribers and reusable blocks). The campaign screens, the settings
-> page and the preview arrive in the next slice.
+> events (bounces, complaints, unsubscribes, opens and clicks from Mailgun and Mailtrap) and the
+> Filament screens (campaigns, blocks, subscribers, settings and the preview). What remains before
+> a release is the swap of the Zen Cart site over to the package.
 > It will be at `0.x`: the API may change between minor versions.
 
 ## What it provides
@@ -50,6 +50,9 @@ One ability opens every newsletter screen. Remap the key under `gates` in the co
 - **Tracked links.** Button blocks, and links in rich text that carry the `nl-tracked-link` marker classes, are rewritten to a signed first-party redirect (`newsletter.link-click`, part of the public routes). A click is recorded against the send and the library block, then redirects to the link's *current* destination, so a corrected link works for mail already sent. Only `http` and `https` destinations are followed.
 - **Images.** The package has no media library: bind `Contracts\NewsletterMedia` to yours (it answers an image's URL and alt text by number, and lists the choices for the editor). The default finds no images.
 - **Filament screens.** `NewslettersPlugin::make()` on a panel adds a *Newsletters* navigation group with:
+  - **Campaigns:** a three-step wizard (details, content blocks, review and send) with a live preview of the rendered email. A campaign can be changed only while it is a draft or scheduled, and deleted only before it was ever queued. Header actions send a test, schedule or reschedule, cancel a schedule, or queue the send now; the view page shows delivery and engagement figures, with relation managers listing each recipient's delivery and every recorded click.
+  - **Settings:** the shared brand name, header line, logo, footer text and unsubscribe-link label.
+  - **Preview:** `newsletters.preview` (`/staff/newsletters/{newsletter}/preview`, `preview` in the config) shows the campaign as the email will look, to staff with the ability.
   - **Subscribers:** list with filters, add and edit (the address is normalised on the server), unsubscribe or re-confirm one (the reason is kept as the consent record), and bulk unsubscribe or CSV export. A subscriber is never deleted here.
   - **Blocks:** the reusable library (text, image, button), with the shared header and footer as system blocks that cannot be deleted and whose content comes from the newsletter settings; a block's page shows its click performance across every campaign that uses it.
   - **Rich-text editor:** every editor has the *Insert Tracked Link* button. Add your own plugins (for example a media library's image button) under `editor.plugins` and `editor.toolbar_buttons`.
