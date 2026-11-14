@@ -8,7 +8,19 @@ use Filagora\Core\Support\Tables;
 use Filagora\Newsletters\Support\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property int $id
+ * @property int $newsletter_id
+ * @property int|null $newsletter_send_id
+ * @property int|null $newsletter_block_id
+ * @property string|null $block_key
+ * @property string|null $label
+ * @property string $destination_url
+ * @property Carbon $clicked_at
+ * @property string|null $ip_hash
+ */
 class NewsletterLinkClick extends Model
 {
     public function getTable(): string
@@ -35,7 +47,7 @@ class NewsletterLinkClick extends Model
     }
 
     /**
-     * @return BelongsTo<Model, $this>
+     * @return BelongsTo<Newsletter, $this>
      */
     public function newsletter(): BelongsTo
     {
@@ -43,7 +55,7 @@ class NewsletterLinkClick extends Model
     }
 
     /**
-     * @return BelongsTo<Model, $this>
+     * @return BelongsTo<NewsletterSend, $this>
      */
     public function send(): BelongsTo
     {
@@ -51,7 +63,7 @@ class NewsletterLinkClick extends Model
     }
 
     /**
-     * @return BelongsTo<Model, $this>
+     * @return BelongsTo<NewsletterBlock, $this>
      */
     public function libraryBlock(): BelongsTo
     {

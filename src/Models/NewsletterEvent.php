@@ -9,7 +9,15 @@ use Filagora\Newsletters\Enums\NewsletterEventType;
 use Filagora\Newsletters\Support\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property int $id
+ * @property int $newsletter_send_id
+ * @property NewsletterEventType $type
+ * @property Carbon $occurred_at
+ * @property array<string, mixed>|null $payload
+ */
 class NewsletterEvent extends Model
 {
     public function getTable(): string
@@ -34,7 +42,7 @@ class NewsletterEvent extends Model
     }
 
     /**
-     * @return BelongsTo<Model, $this>
+     * @return BelongsTo<NewsletterSend, $this>
      */
     public function send(): BelongsTo
     {
