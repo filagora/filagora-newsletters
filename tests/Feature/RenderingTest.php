@@ -74,6 +74,21 @@ it('renders the subject, the content, the footer text and the unsubscribe link',
         ->and($text)->toContain('Newsletter')->toContain('Spring news')->toContain("Big news\nInside")->toContain('https://example.test/unsub');
 });
 
+it('keeps images in rich text within the width of the email', function () {
+    $newsletter = campaign([['type' => 'text', 'body_html' => '<p>Café</p>'
+        .'<img src="https://example.test/wide.png" alt="Wide">'
+        .'<img src="https://example.test/sized.png" alt="Sized" width="300" height="200" style="width: 300px; height: 200px">'
+        .'<img src="https://example.test/capped.png" alt="Capped" style="max-width: 120px">']]);
+
+    $html = renderer()->renderHtml($newsletter);
+
+    expect($html)
+        ->toContain('<img src="https://example.test/wide.png" alt="Wide" style="max-width:100%;height:auto;">')
+        ->toContain('width="300" height="200" style="width: 300px; height: 200px;max-width:100%;height:auto;">')
+        ->toContain('<img src="https://example.test/capped.png" alt="Capped" style="max-width: 120px">')
+        ->and(html_entity_decode($html))->toContain('<p>Café</p>');
+});
+
 it('uses a live library block, and skips an inactive one', function () {
     $block = NewsletterBlock::create(['key' => 'ad', 'name' => 'Ad', 'type' => NewsletterBlockType::Text, 'content' => ['heading' => 'First wording']]);
     $newsletter = campaign([['type' => 'reusable', 'newsletter_block_id' => $block->id]]);
