@@ -263,7 +263,7 @@ class ContentRenderer
             'block_key' => $blockKey,
             'newsletter_block_id' => $newsletterBlockId,
             'heading' => trim((string) ($block['heading'] ?? '')),
-            'body_html' => $this->trackTaggedLinksInHtml(trim((string) ($block['body_html'] ?? '')), $context),
+            'body_html' => $this->fitImagesToWidth($this->trackTaggedLinksInHtml(trim((string) ($block['body_html'] ?? '')), $context)),
             'asset_id' => is_numeric($assetId) ? (int) $assetId : null,
             'asset_url' => $asset['url'] ?? null,
             'asset_alt' => trim((string) ($block['asset_alt'] ?? $asset['alt'] ?? '')),
@@ -371,12 +371,56 @@ class ContentRenderer
     }
 
     /**
+     * Keeps an image placed in rich text from stretching the email: it shrinks to the width
+     * available and keeps its proportions. An image that already sets its own maximum is left alone.
+     */
+    private function fitImagesToWidth(string $html): string
+    {
+        if (stripos($html, '<img') === false) {
+            return $html;
+        }
+
+        return $this->withElements($html, '//img', function (DOMElement $image): void {
+            $style = rtrim(trim($image->getAttribute('style')), ';');
+
+            if (preg_match('/(?:^|;)\s*max-width\s*:/i', $style)) {
+                return;
+            }
+
+            $image->setAttribute('style', ($style === '' ? '' : $style.';').'max-width:100%;height:auto;');
+        });
+    }
+
+    /**
      * Parses an HTML fragment, invokes the callback for every anchor carrying an
      * `InsertTrackedLinkPlugin` marker class, and returns the (possibly mutated) HTML.
      *
      * @param  callable(DOMElement, string, bool): void  $callback
      */
     private function withTrackedLinkAnchors(string $html, callable $callback): string
+    {
+        $query = '//a[contains(@class, "'.TrackedLinkMarkers::ID_MARKER_PREFIX.'")]';
+
+        return $this->withElements($html, $query, function (DOMElement $anchor) use ($callback): void {
+            $class = (string) $anchor->getAttribute('class');
+
+            if (! preg_match('/'.preg_quote(TrackedLinkMarkers::ID_MARKER_PREFIX, '/').'([0-9a-f-]{36})/', $class, $idMatch)) {
+                return;
+            }
+
+            $isButton = str_contains($class, TrackedLinkMarkers::STYLE_MARKER_PREFIX.'button');
+
+            $callback($anchor, $idMatch[1], $isButton);
+        });
+    }
+
+    /**
+     * Parses an HTML fragment, invokes the callback for every element the query matches, and
+     * returns the (possibly mutated) HTML.
+     *
+     * @param  callable(DOMElement): void  $callback
+     */
+    private function withElements(string $html, string $query, callable $callback): string
     {
         $dom = new DOMDocument;
         libxml_use_internal_errors(true);
@@ -387,19 +431,10 @@ class ContentRenderer
         libxml_clear_errors();
 
         $xpath = new DOMXPath($dom);
-        $anchors = $xpath->query('//a[contains(@class, "'.TrackedLinkMarkers::ID_MARKER_PREFIX.'")]');
 
-        foreach ($anchors ?: [] as $anchor) {
-            /** @var DOMElement $anchor */
-            $class = (string) $anchor->getAttribute('class');
-
-            if (! preg_match('/'.preg_quote(TrackedLinkMarkers::ID_MARKER_PREFIX, '/').'([0-9a-f-]{36})/', $class, $idMatch)) {
-                continue;
-            }
-
-            $isButton = str_contains($class, TrackedLinkMarkers::STYLE_MARKER_PREFIX.'button');
-
-            $callback($anchor, $idMatch[1], $isButton);
+        foreach ($xpath->query($query) ?: [] as $element) {
+            /** @var DOMElement $element */
+            $callback($element);
         }
 
         $wrapper = $dom->getElementsByTagName('div')->item(0);
