@@ -5,6 +5,8 @@ All notable changes to this package are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-11-27
+
 ### Fixed
 
 - An image placed in a text block, from the editor or a host's media library button, now shrinks to the width of the email instead of showing at its natural size. An image that sets its own `max-width` is left alone.
