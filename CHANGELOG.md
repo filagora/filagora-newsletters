@@ -5,6 +5,8 @@ All notable changes to this package are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-11-28
+
 ### Changed
 
 - The package registers a privacy contributor with core (`newsletters`): data exports and erasures cover a person's subscriptions and delivery history.
