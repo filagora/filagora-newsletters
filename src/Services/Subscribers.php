@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Filagora\Newsletters\Services;
 
 use Filagora\Newsletters\Enums\NewsletterSubscriberStatus;
+use Filagora\Newsletters\Models\NewsletterSend;
 use Filagora\Newsletters\Models\NewsletterSubscriber;
 use Filagora\Newsletters\Support\Models;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
@@ -14,6 +16,12 @@ use Illuminate\Support\Str;
 
 class Subscribers
 {
+    /**
+     * The key in a subscription's metadata naming the account it belonged to before that account
+     * changed its address.
+     */
+    public const FORMER_USER = 'former_user_id';
+
     /**
      * The words a person agrees to when they subscribe from their profile.
      */
@@ -55,6 +63,10 @@ class Subscribers
             ->first();
     }
 
+    /**
+     * Unlink the subscription held under an address the member is leaving, remembering whose it
+     * was so that their export and erasure still reach it.
+     */
     public function unlinkUserForEmailChange(Model $user, string $oldEmail): int
     {
         $normalizedOldEmail = $this->normalizeEmail($oldEmail);
@@ -63,10 +75,19 @@ class Subscribers
             return 0;
         }
 
-        return Models::class('subscriber')::query()
+        $subscribers = Models::class('subscriber')::query()
             ->where('user_id', $user->getKey())
             ->where('normalized_email', $normalizedOldEmail)
-            ->update(['user_id' => null]);
+            ->get();
+
+        foreach ($subscribers as $subscriber) {
+            $subscriber->fill([
+                'user_id' => null,
+                'metadata' => [...($subscriber->metadata ?? []), self::FORMER_USER => $user->getKey()],
+            ])->save();
+        }
+
+        return $subscribers->count();
     }
 
     public function subscribeFromProfile(Model $user, ?string $ip = null, ?string $userAgent = null): NewsletterSubscriber
@@ -147,16 +168,58 @@ class Subscribers
         return $subscriber;
     }
 
-    public function anonymizeForErasure(Model $user): int
+    /**
+     * Every subscription that is this person's: linked to their account, held under their address,
+     * or left under an address their account had before and since taken up by no other account.
+     *
+     * @return Collection<int, NewsletterSubscriber>
+     */
+    public function allFor(Model $user): Collection
     {
-        $normalizedUserEmail = $this->normalizeEmail((string) $this->emailOf($user));
-        $subscribers = Models::class('subscriber')::query()
+        $normalizedUserEmail = $this->normalizeEmail($this->emailOf($user));
+
+        return Models::class('subscriber')::query()
             ->where(function ($query) use ($user, $normalizedUserEmail): void {
                 $query
                     ->where('user_id', $user->getKey())
-                    ->orWhere('normalized_email', $normalizedUserEmail);
+                    ->orWhere('normalized_email', $normalizedUserEmail)
+                    ->orWhere(fn ($former) => $former
+                        ->whereNull('user_id')
+                        ->where('metadata->'.self::FORMER_USER, $user->getKey()));
             })
+            ->orderBy('id')
             ->get();
+    }
+
+    /**
+     * What was sent to this person: to any of their subscriptions, or to one of their addresses.
+     *
+     * @param  Collection<int, NewsletterSubscriber>  $subscribers  as `allFor()` returns them
+     * @return Collection<int, NewsletterSend>
+     */
+    public function deliveriesFor(Model $user, Collection $subscribers): Collection
+    {
+        $addresses = $subscribers->pluck('normalized_email')
+            ->push($this->normalizeEmail($this->emailOf($user)))
+            ->filter()
+            ->unique()
+            ->values();
+
+        return Models::class('send')::query()
+            ->where(function ($query) use ($subscribers, $addresses): void {
+                $query
+                    ->whereIn('newsletter_subscriber_id', $subscribers->modelKeys())
+                    ->orWhereIn('normalized_email', $addresses->all());
+            })
+            ->orderBy('id')
+            ->get();
+    }
+
+    public function anonymizeForErasure(Model $user): int
+    {
+        $subscribers = $this->allFor($user);
+        // Read before the subscriptions lose the addresses their history is found by.
+        $sends = $this->deliveriesFor($user, $subscribers);
 
         foreach ($subscribers as $subscriber) {
             $normalizedEmail = $this->normalizeEmail((string) ($subscriber->normalized_email ?: $subscriber->email));
@@ -180,29 +243,27 @@ class Subscribers
             $subscriber->save();
         }
 
-        $this->anonymizeSendsForErasure($normalizedUserEmail);
+        $this->anonymizeSendsForErasure($sends);
 
         return $subscribers->count();
     }
 
     /**
-     * Anonymizes delivery-history rows (newsletter_sends) matching the erased email, redacts
-     * raw webhook payloads on their events (may contain the recipient email in provider-specific
-     * shapes not covered by the indexed columns), and severs newsletter_link_clicks from the
-     * now-anonymized sends. Click rows themselves are not personally identifying (no email/name;
-     * ip_hash is a one-way hash) so they're kept, just unlinked, as anonymous engagement analytics.
+     * Anonymizes delivery-history rows (newsletter_sends), redacts raw webhook payloads on their
+     * events (may contain the recipient email in provider-specific shapes not covered by the
+     * indexed columns), and severs newsletter_link_clicks from the now-anonymized sends. Click
+     * rows themselves are not personally identifying (no email/name; ip_hash is a one-way hash)
+     * so they're kept, just unlinked, as anonymous engagement analytics.
+     *
+     * @param  Collection<int, NewsletterSend>  $sends
      */
-    private function anonymizeSendsForErasure(string $normalizedUserEmail): void
+    private function anonymizeSendsForErasure(Collection $sends): void
     {
-        $sends = Models::class('send')::query()
-            ->where('normalized_email', $normalizedUserEmail)
-            ->get();
-
         if ($sends->isEmpty()) {
             return;
         }
 
-        $sendIds = $sends->pluck('id');
+        $sendIds = $sends->modelKeys();
 
         Models::class('event')::query()
             ->whereIn('newsletter_send_id', $sendIds)
@@ -217,6 +278,8 @@ class Subscribers
                 'email' => sprintf('erased-send-%d@anonymized.invalid', $send->id),
                 'normalized_email' => sprintf('erased-send-%d@anonymized.invalid', $send->id),
                 'name' => null,
+                'error' => null,
+                'metadata' => null,
             ]);
             $send->save();
         }
