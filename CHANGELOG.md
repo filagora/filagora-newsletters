@@ -5,6 +5,12 @@ All notable changes to this package are documented here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- The package registers a privacy contributor with core (`newsletters`): data exports and erasures cover a person's subscriptions and delivery history.
+- `unlinkUserForEmailChange()` records the account a subscription belonged to (`former_user_id` in its metadata), so exports and erasures cover addresses the account had before. Addresses unlinked earlier carry no record.
+- `anonymizeForErasure()` also covers deliveries to earlier addresses of a subscription, and empties their `error` and `metadata`.
+
 ## [0.1.1] - 2026-11-27
 
 ### Fixed

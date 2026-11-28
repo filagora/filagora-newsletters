@@ -8,6 +8,7 @@ use Filagora\Core\Modules\Module;
 use Filagora\Core\Modules\ModuleRegistry;
 use Filagora\Core\Navigation\NavigationGroupDefinition;
 use Filagora\Core\Navigation\NavigationGroupRegistry;
+use Filagora\Core\Privacy\PrivacyContributorRegistry;
 use Filagora\Core\Schema\PackageSchema;
 use Filagora\Core\Schema\SchemaRegistry;
 use Filagora\Core\Support\GateAbilities;
@@ -17,6 +18,7 @@ use Filagora\Newsletters\Console\ExportSubscribersCommand;
 use Filagora\Newsletters\Console\QueueScheduledCommand;
 use Filagora\Newsletters\Contracts\NewsletterMedia;
 use Filagora\Newsletters\Media\NoMedia;
+use Filagora\Newsletters\Privacy\NewslettersDataContributor;
 use Filagora\Newsletters\Services\BrandingSettings;
 use Filagora\Newsletters\Services\CampaignMailer;
 use Filagora\Newsletters\Services\CampaignSender;
@@ -58,6 +60,8 @@ class NewslettersServiceProvider extends ServiceProvider
         $this->app->make(SchemaRegistry::class)->register(
             PackageSchema::fromFile('newsletters', __DIR__.'/../database/schema.php', __DIR__.'/../database/migrations'),
         );
+
+        $this->app->make(PrivacyContributorRegistry::class)->register($this->app->make(NewslettersDataContributor::class));
 
         GateAbilities::define('filagora-newsletters.gates');
         $this->app->make(NavigationGroupRegistry::class)->register(new NavigationGroupDefinition(
